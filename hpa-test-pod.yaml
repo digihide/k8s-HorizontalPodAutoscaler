@@ -1,0 +1,60 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-autoscaling
+  namespace: default
+  labels:
+    app: pod-autoscaling
+spec:
+  selector:
+    matchLabels:
+      app: pod-autoscaling
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: pod-autoscaling
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "kubernetes.io/hostname"
+                    operator: In
+                    values:
+                      - rasp-node1 # ノード名を指定
+      containers:
+        - name: pod-autoscaling
+          image: nginx:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pod-autoscaling
+  namespace: default
+spec:
+  selector:
+    app: pod-autoscaling
+  type: LoadBalancer
+  ports:
+    - name: nginx
+      port: 80
+      targetPort: 80
+
+---
+

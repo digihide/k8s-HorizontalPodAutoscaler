@@ -1,0 +1,17 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pod-autoscaling
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pod-autoscaling
+  minReplicas: 2
+  maxReplicas: 30
+  # metrics:
+  #   - type: Resource
+  #     resource:
+  #       name: cpu
+  #       targetAverageUtilization: 25
